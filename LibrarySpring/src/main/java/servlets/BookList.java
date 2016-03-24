@@ -1,0 +1,72 @@
+package servlets;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+
+import appSpecs.DBServices;
+import dao.BookService;
+import dao.BookServiceImpl.BookServiceImpl;
+import entities.Book;
+import entities.User;
+
+/**
+ * Servlet implementation class BookList
+ */
+@WebServlet(urlPatterns={"/booklist"}, name="BookListServlet")
+public class BookList extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public BookList() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		User user;
+		user = (User)session.getAttribute("loggedUser");
+		
+		if(user == null || user.getIsAdmin() == false)
+			response.sendRedirect("index.jsp");
+		else
+		{
+		    BookService bookService = new BookServiceImpl();
+		    if(request.getParameter("delete") != null){			
+				bookService.deleteBook(Integer.parseInt(request.getParameter("delete")));			
+				
+			}
+			
+			List <Book> books =  bookService.getAll(); 
+			request.setAttribute("books", books);
+			request.getRequestDispatcher("allbooks.jsp").forward(request, response);
+		
+		}
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		doGet(request, response);
+	}
+
+}
